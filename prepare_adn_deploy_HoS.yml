@@ -1,0 +1,29 @@
+# Ansible playbook AWS - Deploy and Configure Hunter on Sky 
+---
+- name: "AWS - Install Hunter on Sky"
+  hosts: awsec2instances
+  become: yes
+  tasks:
+    - name: Clone repository
+      git: >
+       repo=https://github.com/GrieverGF/hunter-on-sky.git
+       dest=/opt/hunter-on-sky
+
+    - name: make directories
+      file:
+        path: /opt/hunter-on-sky/vol      
+        state: directory
+    
+    - name: copy default env file
+      shell: cp /opt/hunter-on-sky/testenv /opt/hunter-on-sky/.env
+
+    - name: deploy Docker Compose stack
+      docker_compose:
+        project_src: /opt/hunter-on-sky/
+        files:
+        - docker-compose.yml
+
+    - name: change privileges
+      shell: sudo shown -R ec2-user /opt/hunter-on-sky/vol
+
+ 

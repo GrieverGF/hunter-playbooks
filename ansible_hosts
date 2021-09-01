@@ -1,0 +1,5 @@
+# example of /etc/ansible/hosts file
+# sudo vi /etc/ansible/hosts
+
+[awsec2instances]
+10.2.0.12
