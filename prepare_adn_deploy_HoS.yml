@@ -7,23 +7,49 @@
     - name: Clone repository
       git: >
        repo=https://github.com/GrieverGF/hunter-on-sky.git
-       dest=/opt/hunter-on-sky
+       dest=/opt/hunter-on-the-sky
 
     - name: make directories
       file:
-        path: /opt/hunter-on-sky/vol      
+        path: /opt/hunter-on-the-sky/vol      
         state: directory
+        mode: 776
+    
+
+    - name: change privileges
+      shell: sudo chown -R ec2-user:ec2-user /opt/hunter-on-the-sky/
+    
+    - name: change privileges
+      shell: sudo chown -R 1000:1000 /opt/hunter-on-the-sky/vol
+        
     
     - name: copy default env file
-      shell: cp /opt/hunter-on-sky/testenv /opt/hunter-on-sky/.env
+      shell: cp /opt/hunter-on-the-sky/testenv /opt/hunter-on-the-sky/.env
+
+    - name: replace Public IP
+      shell: PUBLIC_IP=$(dig +short myip.opendns.com @resolver1.opendns.com) && sed -i "s/localhost/${PUBLIC_IP}/g" /opt/hunter-on-the-sky/.env 
 
     - name: deploy Docker Compose stack
       docker_compose:
-        project_src: /opt/hunter-on-sky/
+        project_src: /opt/hunter-on-the-sky/
         files:
         - docker-compose.yml
 
+    - name: pause for 1 minute to build app
+      pause:
+        minutes: 1
+
     - name: change privileges
-      shell: sudo shown -R ec2-user /opt/hunter-on-sky/vol
+      shell: sudo chown -R 1000:1000 /opt/hunter-on-the-sky/vol/thehive/
+
+    - name: Pause for 2 minutes to build app cache
+      pause:
+        minutes: 2
+
+    - name: run integration cortex 2 hive
+      shell: sh /opt/hunter-on-the-sky/scripts/update_key_cortex2hive.sh
+
+    - name: run integration misp 2 hive
+      shell: sh /opt/hunter-on-the-sky/scripts/update_key_misp2hive.sh        
 
  

@@ -27,14 +27,12 @@
     - name: Add extras repository
       shell: yum-config-manager --enable extras
 
+    - name: Install docker packages from amazon-linux-extras packages
+      shell: "amazon-linux-extras install docker -y"
+
     - name: Enable Some packages from amazon-linux-extras packages
-      shell: "amazon-linux-extras install python3.8 ansible2 docker"
-
-    - name: clean yum metadata cache
-      command: yum clean metadata
-      args:
-        warn: false
-
+      shell: "amazon-linux-extras enable python3.8 ansible2 docker"
+    
     - name: Ensure a list of yum packages are installed
       yum:
         name: "{{ packages }}"
@@ -44,7 +42,20 @@
         packages:
         - python3.8
         - ansible
-        - docker
+
+    - name: Enable docker service
+      shell: sudo usermod -a -G docker ec2-user
+
+    - name: Downloading docker-compose
+      shell: sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose  
+
+    - name: Asing docker-compose privileges
+      shell: chmod +x /usr/local/bin/docker-compose
+
+    - name: clean yum metadata cache
+      command: yum clean metadata
+      args:
+        warn: false
 
     - name: Enable Docker CE service at startup
       service:
@@ -63,4 +74,6 @@
         packages:
         - boto
         - boto3
+        - requests
+        - docker
         - docker-compose
