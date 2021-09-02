@@ -7,4 +7,4 @@ ansible_ssh_user=ec2-user
 
 
 [awsec2instances]
-192.168.1.10
+18.221.97.110
